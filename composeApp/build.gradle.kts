@@ -73,6 +73,7 @@ kotlin {
             implementation(compose.components.resources) // SEE https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-images-resources.html
             implementation(compose.components.uiToolingPreview)
             implementation(projects.shared)
+            implementation(projects.yunextBleUtil)
             //implementation(project(":yunext-context"))
             //implementation(libs.yunext.context)
             implementation(libs.bundles.yunext)

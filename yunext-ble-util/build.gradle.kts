@@ -7,6 +7,10 @@ plugins {
 //    id("module.publication")
 //    `maven-publish`
     alias(libs.plugins.maven.publish)
+
+    alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.compose.compiler)
 }
 
 val appVersion = project.findProperty("app_version")?.toString()?:throw GradleException("no app_version in gradle.properties")
@@ -51,18 +55,67 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
+        commonMain.dependencies {
+            // put your Multiplatform dependencies here
+
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.coroutines.core)
+
+//            implementation(libs.ktor.client.core)
+
+//            implementation(libs.ktor.client.cio)
+//            implementation(libs.ktor.client.core)
+
+//            api(libs.kotlinx.datetime)
+//            api(libs.kotlinx.coroutines.core)
+//            api(libs.ktor.client.core)
+//            api(libs.ktor.client.cio)
+//            api(libs.ktor.client.content.negotiation)
+//            api(libs.ktor.serialization.kotlinx.json)
+//            api(libs.ktor.serialization.kotlinx.protobuf)
+//            implementation(libs.ktor.client.logging)
+//            implementation(libs.ktor.client.core.wasm)
+//            implementation(libs.ktor.client.core)
+
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material)
+            implementation(compose.ui)
+            implementation(compose.components.resources) // SEE https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-images-resources.html
+            implementation(compose.components.uiToolingPreview)
+//            implementation(projects.yunextCommon)
+//            implementation(projects.yunextContext)
+            implementation(libs.bundles.yunext)
+//            implementation(projects.yunextBle)
+            implementation(libs.bundles.navigation)
+        }
+
+        iosMain.dependencies {
+            api(libs.ktor.client.core)
+            api(libs.ktor.client.cio)
+            api(libs.ktor.client.darwin)
+        }
+
+        androidMain.dependencies {
+            api(libs.ktor.client.core)
+            api(libs.ktor.client.okhttp)
+            api(libs.ktor.client.cio)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.activity)
+            implementation(libs.androidx.core.ktx)
+            implementation(libs.bundles.androidx.lifecycle)
+        }
+
+        val wasmJsMain by getting {
             dependencies {
-                //put your multiplatform dependencies here
-                implementation(libs.kotlinx.datetime)
-                implementation(libs.yunext.context)
-                implementation(libs.kotlin.reflect)
+                api(libs.ktor.client.core.wasm)
             }
         }
-        val commonTest by getting {
-            dependencies {
-                implementation(libs.kotlin.test)
-            }
+
+        jvmMain.dependencies {
+            api(libs.ktor.client.core)
+            api(libs.ktor.client.okhttp)
+            api(libs.ktor.client.cio)
         }
     }
 }

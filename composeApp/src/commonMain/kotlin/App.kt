@@ -15,9 +15,9 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.yunext.kotlin.kmp.ble.util.ui.BluetoothScreen
 
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import yunext.kotlin.ui.BluetoothScreen
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

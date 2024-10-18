@@ -1,5 +1,5 @@
 
-rootProject.name = "HadlinksKMP"
+rootProject.name = "HadlinksKMP-BleUtil"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
