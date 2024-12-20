@@ -88,6 +88,7 @@ kotlin {
             implementation(libs.bundles.yunext)
 //            implementation(projects.yunextBle)
             implementation(libs.bundles.navigation)
+
         }
 
         iosMain.dependencies {
@@ -104,6 +105,8 @@ kotlin {
             implementation(libs.androidx.activity)
             implementation(libs.androidx.core.ktx)
             implementation(libs.bundles.androidx.lifecycle)
+
+            implementation(libs.kable)
         }
 
         val wasmJsMain by getting {

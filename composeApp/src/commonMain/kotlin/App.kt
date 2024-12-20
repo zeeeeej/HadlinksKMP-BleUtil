@@ -31,7 +31,9 @@ fun App() {
                 remainingInsets.insets = safeContent.exclude(consumedWindowInsets)
             }) {
             // padding can be used without recomposition when insets change.
-            Box(Modifier.padding(remainingInsets.asPaddingValues())){
+            Box(Modifier
+//                .padding(remainingInsets.asPaddingValues())
+            ) {
                 BluetoothScreen(Modifier.fillMaxSize())
             }
         }

@@ -1,4 +1,4 @@
-package com.yunext.kotlin.kmp.ble.util.ui
+package com.yunext.kotlin.kmp.ble.util.ui.master
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column

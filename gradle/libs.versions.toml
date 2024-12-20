@@ -4,7 +4,7 @@ kotlin = "2.0.20"
 kotlinx-datetime = "0.6.0"
 nexus-publish = "2.0.0-rc-1"
 android-minSdk = "28"
-android-compileSdk = "34"
+android-compileSdk = "35"
 maven-publish = "0.28.0"
 
 android-targetSdk = "30"
@@ -21,6 +21,8 @@ junit = "4.13.2"
 ktor = "2.3.11"
 ktor-wasm = "3.2.0"
 navigation = "2.8.0-alpha08"
+flippable = "1.5.4"
+kable = "0.35.0"
 
 
 logback = "1.5.6"
@@ -28,7 +30,7 @@ logback = "1.5.6"
 kotlinx-coroutines = "1.8.0"
 kotlinx-serialization = "1.7.0"
 uiDesktop = "1.7.0"
-yunext = "0.0.3"
+yunext = "0.0.8"
 zhongguose = "0.0.1"
 zeeeeej = "1.0.2"
 task-tree = "2.1.1"
@@ -52,6 +54,11 @@ logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 navigation-common = { module = "org.jetbrains.androidx.navigation:navigation-common", version.ref = "navigation" }
 navigation-runtime = { module = "org.jetbrains.androidx.navigation:navigation-runtime", version.ref = "navigation" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
+# https://composelibraries.com/wajahatkarim3/Flippable
+flippable = { module = "com.wajahatkarim:flippable", version.ref = "flippable" }
+kable = { module = "com.juul.kable:kable-core", version.ref = "kable" }
+
+
 
 
 

@@ -1,4 +1,4 @@
-package com.yunext.kotlin.kmp.ble.util.ui
+package com.yunext.kotlin.kmp.ble.util.ui.master
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -26,21 +26,49 @@ import androidx.navigation.NavHostController
 import color
 import com.yunext.kotlin.kmp.ble.master.PlatformConnectorStatus
 import com.yunext.kotlin.kmp.ble.master.PlatformMasterScanStatus
+import com.yunext.kotlin.kmp.ble.util.domain.Project
+import com.yunext.kotlin.kmp.ble.util.impl.DefaultProject
+import com.yunext.kotlin.kmp.ble.util.impl.asDefaultProject
+import com.yunext.kotlin.kmp.ble.util.ui.HistoriesInfo
+import com.yunext.kotlin.kmp.ble.util.ui.PlatformBluetoothContextInfo
+import com.yunext.kotlin.kmp.ble.util.ui.Screen
+import com.yunext.kotlin.kmp.ble.util.ui.common.HDCommonPageWithTitle
+import com.yunext.kotlin.kmp.ble.util.ui.slave.VMFactory
+import com.yunext.kotlin.kmp.ble.util.ui.slave.display
 import kotlinx.coroutines.launch
 import randomZhongGuoSe
 import com.yunext.kotlin.kmp.ble.util.util.clipBroad
+import kotlinx.serialization.json.Json
+
+
+internal fun NavHostController.navigatorMasterScreen(project: Project) {
+    val json = if (project == null) "{}" else Json.encodeToString(
+        DefaultProject.serializer(),
+        project.asDefaultProject()
+    )
+    this.navigate(route = Screen.Master.name+"/${json}" , builder = {
+        // 启用动画、清除之前的路由等
+//        popUpTo(this@navigatorMainScreen.graph.startDestinationId) {
+//            this.inclusive = false
+//        }
+
+        launchSingleTop = true
+    })
+}
 
 @OptIn(ExperimentalMaterialApi::class)
 @androidx.compose.runtime.Composable
-fun MasterScreen(modifier: Modifier = Modifier, controller: NavHostController, onBack: () -> Unit) {
-    val masterVM: MasterVM = viewModel()
+fun MasterScreen(modifier: Modifier = Modifier.fillMaxSize(),
+                 project:Project,
+                 controller: NavHostController, onBack: () -> Unit) {
+    val masterVM: MasterVM = viewModel(factory = VMFactory(project = project))
     val state by masterVM.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberBottomDrawerState(Closed)
     val scaffoldState = rememberScaffoldState()
 
     val content: @Composable () -> Unit = {
-        Column(modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+        Column(modifier.fillMaxWidth().padding(horizontal = 0.dp)) {
             PlatformBluetoothContextInfo(
                 Modifier.fillMaxWidth(),
                 state.enable,
@@ -109,18 +137,25 @@ fun MasterScreen(modifier: Modifier = Modifier, controller: NavHostController, o
             }
         )
     }
-    Box(Modifier.fillMaxSize()) {
-        Scaffold(scaffoldState = scaffoldState) {
-            BottomDrawer(
-                drawerContent = {
-                    histories()
-                },
-                modifier = Modifier.fillMaxSize(),
-                drawerState = drawerState,
-                gesturesEnabled = drawerState.isClosed
 
-            ) {
-                content()
+    HDCommonPageWithTitle(
+        modifier,
+        title = "Master",
+        onBack = onBack
+    ) {
+        Box(Modifier.fillMaxSize()) {
+            Scaffold(scaffoldState = scaffoldState) {
+                BottomDrawer(
+                    drawerContent = {
+                        histories()
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    drawerState = drawerState,
+                    gesturesEnabled = false//drawerState.isClosed
+
+                ) {
+                    content()
+                }
             }
         }
     }

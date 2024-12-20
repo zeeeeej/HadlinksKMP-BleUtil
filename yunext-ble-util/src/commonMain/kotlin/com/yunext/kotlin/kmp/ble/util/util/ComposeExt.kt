@@ -11,13 +11,15 @@ import androidx.compose.ui.unit.dp
 import color
 import randomZhongGuoSe
 
-fun Modifier.randomBG(padding:Dp = 12.dp): Modifier {
+internal val DEFAULT_DP = 12.dp
+
+fun Modifier.randomBG(padding: Dp = DEFAULT_DP): Modifier {
     return this.composed {
 
         this
             .padding(padding)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(DEFAULT_DP))
             .background(randomZhongGuoSe().color.copy(alpha = .5f))
-            .padding(12.dp)
+            .padding(DEFAULT_DP)
     }
 }

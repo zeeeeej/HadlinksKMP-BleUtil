@@ -1,4 +1,4 @@
-package com.yunext.kotlin.kmp.ble.util.ui
+package com.yunext.kotlin.kmp.ble.util.ui.slave
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberBottomDrawerState
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,28 +22,56 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.yunext.kotlin.kmp.ble.history.BluetoothHistory
 import com.yunext.kotlin.kmp.ble.history.type
+import com.yunext.kotlin.kmp.ble.util.domain.Project
+import com.yunext.kotlin.kmp.ble.util.impl.DefaultProject
+import com.yunext.kotlin.kmp.ble.util.impl.asDefaultProject
+import com.yunext.kotlin.kmp.ble.util.ui.HistoriesInfo
+import com.yunext.kotlin.kmp.ble.util.ui.PlatformBluetoothContextInfo
+import com.yunext.kotlin.kmp.ble.util.ui.Screen
+import com.yunext.kotlin.kmp.ble.util.ui.common.HDCommonPageWithTitle
 import com.yunext.kotlin.kmp.common.util.datetimeFormat
 import kotlinx.coroutines.launch
 import com.yunext.kotlin.kmp.ble.util.util.clipBroad
+import kotlinx.serialization.json.Json
 import kotlin.uuid.ExperimentalUuidApi
 
-@Deprecated("delete")
-@androidx.compose.runtime.Composable
-expect fun SlaveScreenPlatform(
-    modifier: Modifier,
-    @OptIn(ExperimentalUuidApi::class)
-    content: @Composable SlaveVM.() -> Unit
-)
+internal fun NavHostController.navigatorSlaveScreen(project: Project) {
+    val json = if (project == null) "{}" else Json.encodeToString(
+        DefaultProject.serializer(),
+        project.asDefaultProject()
+    )
+    this.navigate(route = Screen.Slave.name+"/${json}", builder = {
+        // 启用动画、清除之前的路由等
+//        popUpTo(this@navigatorSlaveScreen.graph.startDestinationId) {
+//            this.inclusive = false
+//        }
+        launchSingleTop = true
+    })
+}
+
+
 
 @OptIn(ExperimentalUuidApi::class)
 @androidx.compose.runtime.Composable
-fun SlaveScreen(modifier: Modifier = Modifier, controller: NavHostController, onBack: () -> Unit) {
+fun SlaveScreen(
+    modifier: Modifier = Modifier.fillMaxSize(),
+    project: Project,
+    controller: NavHostController,
+    onBack: () -> Unit
+) {
 //    @OptIn(ExperimentalUuidApi::class)
 //    SlaveScreenPlatform(modifier) {
 //        SlaveScreenInternal(modifier, this)
 //    }
-    val vm: SlaveVM = viewModel()
-    SlaveScreenInternal(modifier, vm)
+    HDCommonPageWithTitle(
+        modifier,
+        title = "Slave",
+        onBack = onBack
+    ) {
+
+        val vm: SlaveVM = viewModel(factory = VMFactory(project))
+        SlaveScreenInternal(modifier, vm)
+    }
 }
 
 val BluetoothHistory.display: String
@@ -80,7 +107,7 @@ private fun SlaveScreenInternal(modifier: Modifier = Modifier, slaveVM: SlaveVM)
                 },
                 modifier = Modifier.fillMaxSize(),
                 drawerState = drawerState,
-                gesturesEnabled = drawerState.isClosed
+                gesturesEnabled = false//drawerState.isClosed
 
             ) {
                 Column(modifier.fillMaxWidth()) {

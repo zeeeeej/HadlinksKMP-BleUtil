@@ -1,4 +1,4 @@
-package com.yunext.kotlin.kmp.ble.util.ui
+package com.yunext.kotlin.kmp.ble.util.ui.slave
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
