@@ -18,13 +18,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.yunext.kotlin.kmp.ble.history.BluetoothHistory
 import com.yunext.kotlin.kmp.ble.history.type
 import com.yunext.kotlin.kmp.ble.util.domain.Project
-import com.yunext.kotlin.kmp.ble.util.impl.DefaultProject
-import com.yunext.kotlin.kmp.ble.util.impl.asDefaultProject
+import com.yunext.kotlin.kmp.ble.util.domain.encode
 import com.yunext.kotlin.kmp.ble.util.ui.HistoriesInfo
 import com.yunext.kotlin.kmp.ble.util.ui.PlatformBluetoothContextInfo
 import com.yunext.kotlin.kmp.ble.util.ui.Screen
@@ -32,14 +32,10 @@ import com.yunext.kotlin.kmp.ble.util.ui.common.HDCommonPageWithTitle
 import com.yunext.kotlin.kmp.common.util.datetimeFormat
 import kotlinx.coroutines.launch
 import com.yunext.kotlin.kmp.ble.util.util.clipBroad
-import kotlinx.serialization.json.Json
 import kotlin.uuid.ExperimentalUuidApi
 
 internal fun NavHostController.navigatorSlaveScreen(project: Project) {
-    val json = if (project == null) "{}" else Json.encodeToString(
-        DefaultProject.serializer(),
-        project.asDefaultProject()
-    )
+    val json = project.encode()
     this.navigate(route = Screen.Slave.name+"/${json}", builder = {
         // 启用动画、清除之前的路由等
 //        popUpTo(this@navigatorSlaveScreen.graph.startDestinationId) {
@@ -56,6 +52,12 @@ internal fun NavHostController.navigatorSlaveScreen(project: Project) {
 fun SlaveScreen(
     modifier: Modifier = Modifier.fillMaxSize(),
     project: Project,
+    vm: SlaveVM  = viewModel {
+//        SlaveVM(project)
+        // extension methods on CreationExtras such as createSavedStateHandle()
+    val handle = createSavedStateHandle()     // You can send any custom parameter, repository, etc. to your ViewModel.
+                              SlaveVM(handle, project)
+                             },
     controller: NavHostController,
     onBack: () -> Unit
 ) {
@@ -69,7 +71,10 @@ fun SlaveScreen(
         onBack = onBack
     ) {
 
-        val vm: SlaveVM = viewModel(factory = VMFactory(project))
+//        val vm: SlaveVM = viewModel(factory = VMFactory(), extras = creationExtrasOfProject(project))
+//        val vm: SlaveVM = viewModel(){
+//            SlaveVM(project)
+//        }
         SlaveScreenInternal(modifier, vm)
     }
 }

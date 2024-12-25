@@ -145,6 +145,7 @@ private fun ProjectItem(
             Text(project.id)
             Text(project.name)
             Text(project.secret)
+            Text(project.defaultDeviceName)
         }
 
         Image(Icons.Default.Edit, null, modifier = Modifier.align(Alignment.TopEnd).clickable {

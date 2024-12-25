@@ -12,19 +12,6 @@ plugins {
 }
 
 kotlin {
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser {
-            commonWebpackConfig {
-                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                    static = (static ?: mutableListOf()).apply {
-                        // Serve sources to debug inside browser
-                        add(project.projectDir.path)
-                    }
-                }
-            }
-        }
-    }
 
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
@@ -91,12 +78,6 @@ kotlin {
             implementation(libs.bundles.androidx.lifecycle)
         }
 
-        val wasmJsMain by getting {
-            dependencies {
-                api(libs.ktor.client.core.wasm)
-            }
-        }
-        
         jvmMain.dependencies {
             api(libs.ktor.client.core)
             api(libs.ktor.client.okhttp)

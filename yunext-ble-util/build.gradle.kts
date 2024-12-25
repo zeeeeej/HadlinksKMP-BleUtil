@@ -1,5 +1,4 @@
 import com.vanniktech.maven.publish.SonatypeHost
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -36,24 +35,6 @@ kotlin {
     iosSimulatorArm64()
 //    linuxX64()
 
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs {
-        moduleName = "composeApp"
-        browser {
-            val projectDirPath = project.projectDir.path
-            commonWebpackConfig {
-                outputFileName = "composeApp.js"
-                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                    static = (static ?: mutableListOf()).apply {
-                        // Serve sources to debug inside browser
-                        add(projectDirPath)
-                    }
-                }
-            }
-        }
-        binaries.executable()
-    }
-
     sourceSets {
         commonMain.dependencies {
             // put your Multiplatform dependencies here
@@ -89,6 +70,8 @@ kotlin {
 //            implementation(projects.yunextBle)
             implementation(libs.bundles.navigation)
 
+            api(libs.kable)
+
         }
 
         iosMain.dependencies {
@@ -106,13 +89,6 @@ kotlin {
             implementation(libs.androidx.core.ktx)
             implementation(libs.bundles.androidx.lifecycle)
 
-            implementation(libs.kable)
-        }
-
-        val wasmJsMain by getting {
-            dependencies {
-                api(libs.ktor.client.core.wasm)
-            }
         }
 
         jvmMain.dependencies {

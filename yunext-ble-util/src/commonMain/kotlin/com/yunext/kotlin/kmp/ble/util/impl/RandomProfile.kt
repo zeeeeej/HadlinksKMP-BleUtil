@@ -13,9 +13,10 @@ import com.yunext.kotlin.kmp.common.logger.HDLogger.Companion.d
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@ExperimentalUuidApi
+
 class RandomProfile(val name:String) : IProfile {
 
+    @ExperimentalUuidApi
     private fun generateServiceRandom(): PlatformBluetoothGattService {
         val descriptorCreator = {
             bluetoothGattDescriptor(
@@ -56,8 +57,9 @@ class RandomProfile(val name:String) : IProfile {
             characteristicCreator(arrayOf(descriptorCreator()))
         }.toTypedArray())
     }
-
+    @ExperimentalUuidApi
     private fun generateServicesRandom(): List<PlatformBluetoothGattService> {
+
         val services = (0..5).map {
             generateServiceRandom()
         }
@@ -66,10 +68,14 @@ class RandomProfile(val name:String) : IProfile {
         }
     }
 
+
     override fun create() = object : SlaveSetting {
         override val deviceName: String = "${name}_84C2E4030202"
 
+        @ExperimentalUuidApi
         override val broadcastService: PlatformBluetoothGattService = generateServiceRandom()
+
+        @ExperimentalUuidApi
         override val services: Array<PlatformBluetoothGattService> =
             generateServicesRandom().toTypedArray()
         override val broadcastTimeout: Long = 60_000

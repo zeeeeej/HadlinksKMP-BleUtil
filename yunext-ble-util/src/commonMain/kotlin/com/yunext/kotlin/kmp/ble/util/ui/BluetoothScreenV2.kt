@@ -20,12 +20,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import color
 import com.yunext.kotlin.kmp.ble.util.domain.HDResult
+import com.yunext.kotlin.kmp.ble.util.domain.projectOf
 import com.yunext.kotlin.kmp.ble.util.impl.DefaultProject
 import com.yunext.kotlin.kmp.ble.util.ui.main.MainScreen
 import com.yunext.kotlin.kmp.ble.util.ui.main.MainVM
@@ -43,13 +46,15 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlin.uuid.ExperimentalUuidApi
 
-@OptIn(ExperimentalUuidApi::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalUuidApi::class, ExperimentalLayoutApi::class, ExperimentalStdlibApi::class)
 @Composable
 fun BluetoothScreen(modifier: Modifier) {
     val rootNavController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()
     val currentBackStackEntryAsState by rootNavController.currentBackStackEntryAsState()
-    val vm: MainVM = viewModel()
+    val vm: MainVM = viewModel(){
+        MainVM()
+    }
     val state by vm.state.collectAsStateWithLifecycle()
     val remainingInsets = remember { MutableWindowInsets() }
     val safeContent = WindowInsets.safeContent
@@ -85,11 +90,7 @@ fun BluetoothScreen(modifier: Modifier) {
             composable(Screen.Slave.name + "/{${KEY_ProjectAdd}}") { backStackEntry ->
                 val source: DefaultProject? =
                     backStackEntry.arguments?.getString(KEY_ProjectAdd)?.run {
-                        try {
-                            Json.decodeFromString(this)
-                        } catch (e: Exception) {
-                            null
-                        }
+                        projectOf(this)
                     }
                 check(source != null) {
                     "没有project信息"
@@ -102,11 +103,7 @@ fun BluetoothScreen(modifier: Modifier) {
             composable(Screen.Master.name + "/{${KEY_ProjectAdd}}") { backStackEntry ->
                 val source: DefaultProject? =
                     backStackEntry.arguments?.getString(KEY_ProjectAdd)?.run {
-                        try {
-                            Json.decodeFromString(this)
-                        } catch (e: Exception) {
-                            null
-                        }
+                        projectOf(this)
                     }
                 check(source != null) {
                     "没有project信息"
@@ -116,14 +113,12 @@ fun BluetoothScreen(modifier: Modifier) {
                 })
             }
 
-            composable(Screen.ProjectAdd.name + "/{${KEY_ProjectAdd}}") { backStackEntry ->
+            composable(Screen.ProjectAdd.name + "/{${KEY_ProjectAdd}}",arguments = listOf( navArgument(KEY_ProjectAdd) {
+                type = NavType.StringType
+            })) { backStackEntry ->
                 val source: DefaultProject? =
                     backStackEntry.arguments?.getString(KEY_ProjectAdd)?.run {
-                        try {
-                            Json.decodeFromString(this)
-                        } catch (e: Exception) {
-                            null
-                        }
+                        projectOf(this)
                     }
                 ProjectAddScreen(controller = rootNavController, onBack = {
                     rootNavController.navigatorProjectListScreen()

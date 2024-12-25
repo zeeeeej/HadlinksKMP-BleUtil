@@ -25,12 +25,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             App()
-
-            Text("测试kable", modifier = Modifier
-                .padding(32.dp)
-                .clickable {
-
-                })
         }
     }
 

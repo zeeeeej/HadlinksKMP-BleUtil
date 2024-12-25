@@ -12,23 +12,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import com.yunext.kotlin.kmp.ble.util.domain.Project
+import com.yunext.kotlin.kmp.ble.util.domain.encode
 import com.yunext.kotlin.kmp.ble.util.impl.DefaultProject
 import com.yunext.kotlin.kmp.ble.util.impl.asDefaultProject
 import com.yunext.kotlin.kmp.ble.util.ui.Screen
 import com.yunext.kotlin.kmp.ble.util.ui.common.HDCommonPageWithTitle
+import com.yunext.kotlin.kmp.common.korlibs.crypto.Cipher
 import kotlinx.serialization.json.Json
 
 internal const val KEY_ProjectAdd = "ProjectAdd_project"
 
 internal fun NavHostController.navigatorProjectAddScreen(project: Project?) {
-    val json = if (project == null) "{}" else Json.encodeToString(
-        DefaultProject.serializer(),
-        project.asDefaultProject()
-    )
-    this.navigate(route = Screen.ProjectAdd.name + "/${json}", builder = {
+    val data = project.encode()
+    this.navigate(route = Screen.ProjectAdd.name + "/${data}", builder = {
         // 启用动画、清除之前的路由等
 //        popUpTo(this@navigatorProjectListScreen.graph.startDestinationId) {
 //            this.inclusive = false
@@ -61,6 +61,9 @@ fun ProjectAddScreen(
             var curSecret by remember {
                 mutableStateOf(project?.secret ?: "")
             }
+            var curDefaultDeviceName by remember {
+                mutableStateOf(project?.defaultDeviceName ?: "")
+            }
 
             Row {
                 Text("id")
@@ -80,6 +83,12 @@ fun ProjectAddScreen(
                     curSecret = it
                 })
             }
+            Row {
+                Text("DefaultDeviceName")
+                TextField(value = curDefaultDeviceName, onValueChange = {
+                    curDefaultDeviceName = it
+                })
+            }
 
             Button(onClick = {
                 onCommit(
@@ -87,7 +96,8 @@ fun ProjectAddScreen(
                         id = curId,
                         name = curName,
 //                        scanFilters = listOf(DeviceNamePlatformMasterScanFilter("angel")),
-                        secret = curSecret
+                        secret = curSecret,
+                        defaultDeviceName = curDefaultDeviceName
                     )
                 )
             }) {

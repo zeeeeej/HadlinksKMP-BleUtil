@@ -1,5 +1,6 @@
 package com.yunext.kotlin.kmp.ble.util.ui.master
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yunext.kotlin.kmp.ble.core.PlatformBluetoothContext
@@ -35,7 +36,7 @@ data class MasterVMState(
 )
 
 
-class MasterVM(private val project: Project) : ViewModel() {
+class MasterVM(handle: SavedStateHandle,private val project: Project) : ViewModel() {
     private val platformBluetoothContext: PlatformBluetoothContext = platformBluetoothContext()
     private val _state: MutableStateFlow<MasterVMState> =
         MutableStateFlow(MasterVMState())

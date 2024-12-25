@@ -12,14 +12,15 @@ import com.yunext.kotlin.kmp.ble.util.domain.IProfile
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@ExperimentalUuidApi
 class DefaultProfile(private val name: String) : IProfile {
+    @ExperimentalUuidApi
 
     private fun angelService(): PlatformBluetoothGattService {
 
 
         val serviceCreator: (String, Array<PlatformBluetoothGattCharacteristic>) -> PlatformBluetoothGattService =
             { uuid, chs ->
+
                 bluetoothGattService(
                     Uuid.parse(uuid), PlatformBluetoothGattService.ServiceType.Primary,
                     emptyArray(), chs
@@ -70,7 +71,9 @@ class DefaultProfile(private val name: String) : IProfile {
         return serviceCreator("616e6765-6c62-6c70-6573-657276696365", arrayOf(write, notify))
     }
 
+
     override fun create(): SlaveSetting {
+
         return object : SlaveSetting {
             @OptIn(ExperimentalStdlibApi::class)
 //        override val deviceName: String = "angel_${Random.Default.nextBytes(3).toHexString()}"
@@ -80,7 +83,9 @@ class DefaultProfile(private val name: String) : IProfile {
             //        override val deviceName: String = "B#QY#${Random.Default.nextBytes(4).toHexString()}#${
 //            Random.Default.nextBytes(3).toHexString()
 //        }"
+            @ExperimentalUuidApi
             override val broadcastService: PlatformBluetoothGattService = angelService()
+            @ExperimentalUuidApi
             override val services: Array<PlatformBluetoothGattService> =
                 arrayOf(angelService())
             override val broadcastTimeout: Long = 60_000

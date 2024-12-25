@@ -21,32 +21,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import color
 import com.yunext.kotlin.kmp.ble.master.PlatformConnectorStatus
 import com.yunext.kotlin.kmp.ble.master.PlatformMasterScanStatus
 import com.yunext.kotlin.kmp.ble.util.domain.Project
-import com.yunext.kotlin.kmp.ble.util.impl.DefaultProject
-import com.yunext.kotlin.kmp.ble.util.impl.asDefaultProject
+import com.yunext.kotlin.kmp.ble.util.domain.encode
 import com.yunext.kotlin.kmp.ble.util.ui.HistoriesInfo
 import com.yunext.kotlin.kmp.ble.util.ui.PlatformBluetoothContextInfo
 import com.yunext.kotlin.kmp.ble.util.ui.Screen
 import com.yunext.kotlin.kmp.ble.util.ui.common.HDCommonPageWithTitle
-import com.yunext.kotlin.kmp.ble.util.ui.slave.VMFactory
 import com.yunext.kotlin.kmp.ble.util.ui.slave.display
 import kotlinx.coroutines.launch
 import randomZhongGuoSe
 import com.yunext.kotlin.kmp.ble.util.util.clipBroad
-import kotlinx.serialization.json.Json
 
 
 internal fun NavHostController.navigatorMasterScreen(project: Project) {
-    val json = if (project == null) "{}" else Json.encodeToString(
-        DefaultProject.serializer(),
-        project.asDefaultProject()
-    )
-    this.navigate(route = Screen.Master.name+"/${json}" , builder = {
+    val json = project.encode()
+    this.navigate(route = Screen.Master.name + "/${json}", builder = {
         // 启用动画、清除之前的路由等
 //        popUpTo(this@navigatorMainScreen.graph.startDestinationId) {
 //            this.inclusive = false
@@ -58,10 +53,23 @@ internal fun NavHostController.navigatorMasterScreen(project: Project) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @androidx.compose.runtime.Composable
-fun MasterScreen(modifier: Modifier = Modifier.fillMaxSize(),
-                 project:Project,
-                 controller: NavHostController, onBack: () -> Unit) {
-    val masterVM: MasterVM = viewModel(factory = VMFactory(project = project))
+fun MasterScreen(
+    modifier: Modifier = Modifier.fillMaxSize(),
+    project: Project,
+    masterVM: MasterVM = viewModel {
+//                     MasterVM(project)
+        val handle =
+            createSavedStateHandle()     // You can send any custom parameter, repository, etc. to your ViewModel.
+        MasterVM(handle, project)
+    },
+
+    controller: NavHostController, onBack: () -> Unit
+) {
+//    val masterVM: MasterVM = viewModel(factory = VMFactory(), extras = creationExtrasOfProject(project))
+//    val masterVM: MasterVM = composeViewModel()
+//    val masterVM: MasterVM = viewModel(){
+//        MasterVM(project)
+//    }
     val state by masterVM.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberBottomDrawerState(Closed)

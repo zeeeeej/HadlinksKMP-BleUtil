@@ -86,7 +86,7 @@ class WaterDispenserProfile(val name: String) {
                 descriptors = arrayOf(
                     bluetoothGattDescriptor(
                         uuid = Uuid.parse(Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION),
-                        permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                        permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                         value = byteArrayOf(0x00)
                     ),
                     bluetoothGattDescriptor(
@@ -112,7 +112,7 @@ class WaterDispenserProfile(val name: String) {
                 descriptors = arrayOf(
                     bluetoothGattDescriptor(
                         uuid = Uuid.parse(Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION),
-                        permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                        permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                         value = byteArrayOf(0x00)
                     ),
                     bluetoothGattDescriptor(
@@ -139,7 +139,7 @@ class WaterDispenserProfile(val name: String) {
                 descriptors = arrayOf(
                     bluetoothGattDescriptor(
                         uuid = Uuid.parse(Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION),
-                        permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                        permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                         value = byteArrayOf(0x00)
                     ),
                     bluetoothGattDescriptor(
@@ -166,7 +166,7 @@ class WaterDispenserProfile(val name: String) {
                 descriptors = arrayOf(
                     bluetoothGattDescriptor(
                         uuid = Uuid.parse(Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION),
-                        permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                        permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                         value = byteArrayOf(0x00)
                     ),
                     bluetoothGattDescriptor(
@@ -209,7 +209,7 @@ class WaterDispenserProfile(val name: String) {
             descriptors = arrayOf(
                 bluetoothGattDescriptor(
                     uuid = Uuid.parse(Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION),
-                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                     value = byteArrayOf(0x00)
                 ),
                 bluetoothGattDescriptor(
@@ -274,7 +274,7 @@ class WaterDispenserProfile(val name: String) {
             descriptors = arrayOf(
                 bluetoothGattDescriptor(
                     uuid = Uuid.parse(Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION),
-                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                     value = byteArrayOf(0x00)
                 ),
                 bluetoothGattDescriptor(
@@ -340,7 +340,7 @@ class WaterDispenserProfile(val name: String) {
             descriptors = arrayOf(
                 bluetoothGattDescriptor(
                     uuid = Uuid.parse(Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION),
-                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                     value =
                     byteArrayOf(0x00)
                 ),
@@ -412,7 +412,7 @@ class WaterDispenserProfile(val name: String) {
                     uuid = Uuid.parse(
                         Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION
                     ),
-                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                     value =
                     byteArrayOf(0x00)
                 ),
@@ -484,7 +484,7 @@ class WaterDispenserProfile(val name: String) {
                     uuid = Uuid.parse(
                         Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION
                     ),
-                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                     value = byteArrayOf(0x00)
                 ),
                 bluetoothGattDescriptor(
@@ -556,7 +556,7 @@ class WaterDispenserProfile(val name: String) {
                     uuid = Uuid.parse(
                         Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION
                     ),
-                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                     value =
                     byteArrayOf(0x00)
                 ),
@@ -628,7 +628,7 @@ class WaterDispenserProfile(val name: String) {
                     uuid = Uuid.parse(
                         Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION
                     ),
-                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                     value =
                     byteArrayOf(0x00)
                 ),
@@ -700,7 +700,7 @@ class WaterDispenserProfile(val name: String) {
                     uuid = Uuid.parse(
                         Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION
                     ),
-                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                     value =
                     byteArrayOf(0x00)
                 ),
@@ -770,7 +770,7 @@ class WaterDispenserProfile(val name: String) {
                     uuid = Uuid.parse(
                         Sig.UUID_CLIENT_CHARACTERISTIC_CONFIGURATION
                     ),
-                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                    permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                     value =
                     byteArrayOf(0x00)
                 ),

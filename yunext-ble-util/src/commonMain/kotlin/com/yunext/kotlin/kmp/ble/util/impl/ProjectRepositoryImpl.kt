@@ -8,6 +8,7 @@ import com.yunext.kotlin.kmp.common.util.currentTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import kotlin.random.Random
 
 @Serializable
 data class DefaultProject(
@@ -16,35 +17,49 @@ data class DefaultProject(
 //    override val scanFilters: List<PlatformMasterScanFilter>,
     override val secret: String,
     val createTime: Long = currentTime(),
-    val editTime: Long = currentTime()
+    val editTime: Long = currentTime(), override val defaultDeviceName: String
 ) : Project
 
 internal fun Project.asDefaultProject() = DefaultProject(
-    id = this.id, name = this.name, /*scanFilters = this.scanFilters,*/ secret = this.secret
+    id = this.id,
+    name = this.name, /*scanFilters = this.scanFilters,*/
+    secret = this.secret,
+    defaultDeviceName = this.defaultDeviceName
 )
 
 class ProjectRepositoryImpl : ProjectRepository {
 
-    companion object{
+    companion object {
+        @OptIn(ExperimentalStdlibApi::class)
         internal val p1 = DefaultProject(
             "angel01",
             "安吉尔测试1",
 //            listOf(DeviceNamePlatformMasterScanFilter("_angel")),
-            "123456", createTime = currentTime(), editTime = currentTime()
+            "123456",
+            createTime = currentTime(),
+            editTime = currentTime(),
+            defaultDeviceName = "angel_${
+                Random.Default.nextBytes(4).toHexString()}"
         )
         internal val p2 = DefaultProject(
             "qinyuan01",
             "qinyuan测试1",
 //            listOf(DeviceNamePlatformMasterScanFilter("B#QY#")),
-            "123456", createTime = currentTime(), editTime = currentTime()
+            "123456", createTime = currentTime(), editTime = currentTime(), "B#QY#URQ6690#686B60"
         )
+        @OptIn(ExperimentalStdlibApi::class)
         internal val p3 = DefaultProject(
             "water",
             "饮水机",
 //            listOf(DeviceNamePlatformMasterScanFilter("_angel")),
-            "123456", createTime = currentTime(), editTime = currentTime()
+            "123456",
+            createTime = currentTime(),
+            editTime = currentTime(),
+            defaultDeviceName = "water_${
+                Random.Default.nextBytes(4).toHexString()}"
         )
     }
+
     private val map: MutableMap<String, DefaultProject> = mutableMapOf()
 
 
@@ -74,7 +89,7 @@ class ProjectRepositoryImpl : ProjectRepository {
         return withContext(Dispatchers.Default) {
             val id = project.id
             val old = map[id] ?: return@withContext false
-            map[id] = old.asDefaultProject().copy(editTime = currentTime())
+            map[id] = project.asDefaultProject().copy(editTime = currentTime())
             return@withContext true
         }
     }
