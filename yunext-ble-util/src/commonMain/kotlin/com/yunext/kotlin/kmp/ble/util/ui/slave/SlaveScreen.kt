@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.yunext.kotlin.kmp.ble.history.BluetoothHistory
 import com.yunext.kotlin.kmp.ble.history.type
@@ -43,6 +44,8 @@ internal fun NavHostController.navigatorSlaveScreen(project: Project) {
 //        }
         launchSingleTop = true
     })
+
+
 }
 
 

@@ -10,6 +10,7 @@ import com.yunext.kotlin.kmp.ble.util.domain.HDResult
 import com.yunext.kotlin.kmp.ble.util.domain.Project
 import com.yunext.kotlin.kmp.ble.util.domain.ProjectRepository
 import com.yunext.kotlin.kmp.ble.util.impl.ProjectRepositoryImpl
+import com.yunext.kotlin.kmp.ble.util.ui.XVM
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,10 +27,24 @@ data class MainVMState(
 )
 
 
+interface IMainVM :XVM{
+    val state: StateFlow<MainVMState>
 
-@ExperimentalUuidApi
+    fun onCleared()
 
-class MainVM : ViewModel() {
+    suspend fun addSuspend(project: Project): HDResult<Boolean>
+
+    suspend fun editSuspend(project: Project): HDResult<Boolean>
+
+    fun selectProject(project: Project)
+
+    fun requestPermission(permission: PlatformPermission)
+}
+
+expect fun generateMainVM(): IMainVM
+
+
+class MainVM : ViewModel(), IMainVM {
     private val projectRepository: ProjectRepository by lazy {
         ProjectRepositoryImpl()
     }
@@ -37,7 +52,7 @@ class MainVM : ViewModel() {
     private val platformBluetoothContext: PlatformBluetoothContext = platformBluetoothContext()
 
     private val _state: MutableStateFlow<MainVMState> = MutableStateFlow(MainVMState())
-    val state: StateFlow<MainVMState> = _state.asStateFlow()
+    override val state: StateFlow<MainVMState> = _state.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -93,7 +108,7 @@ class MainVM : ViewModel() {
         }
     }
 
-    suspend fun addSuspend(project: Project): HDResult<Boolean> {
+    override suspend fun addSuspend(project: Project): HDResult<Boolean> {
         return try {
             val add = projectRepository.add(project)
             if (add) {
@@ -108,7 +123,7 @@ class MainVM : ViewModel() {
         }
     }
 
-    suspend fun editSuspend(project: Project): HDResult<Boolean> {
+    override suspend fun editSuspend(project: Project): HDResult<Boolean> {
         return try {
             val add = projectRepository.edit(project)
             if (add) {
@@ -141,12 +156,12 @@ class MainVM : ViewModel() {
 
     }
 
-    fun selectProject(project: Project) {
+    override fun selectProject(project: Project) {
         _state.value = state.value.copy(project = project)
     }
 
 
-    fun requestPermission(permission: PlatformPermission) {
+    override fun requestPermission(permission: PlatformPermission) {
         platformBluetoothContext.requestPermission(permission)
     }
 }

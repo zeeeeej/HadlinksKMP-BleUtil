@@ -15,9 +15,11 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -30,8 +32,10 @@ import color
 import com.yunext.kotlin.kmp.ble.util.domain.HDResult
 import com.yunext.kotlin.kmp.ble.util.domain.projectOf
 import com.yunext.kotlin.kmp.ble.util.impl.DefaultProject
+import com.yunext.kotlin.kmp.ble.util.ui.main.IMainVM
 import com.yunext.kotlin.kmp.ble.util.ui.main.MainScreen
 import com.yunext.kotlin.kmp.ble.util.ui.main.MainVM
+import com.yunext.kotlin.kmp.ble.util.ui.main.generateMainVM
 import com.yunext.kotlin.kmp.ble.util.ui.main.navigatorMainScreen
 import com.yunext.kotlin.kmp.ble.util.ui.master.MasterScreen
 import com.yunext.kotlin.kmp.ble.util.ui.master.navigatorMasterScreen
@@ -43,8 +47,12 @@ import com.yunext.kotlin.kmp.ble.util.ui.project.navigatorProjectListScreen
 import com.yunext.kotlin.kmp.ble.util.ui.slave.SlaveScreen
 import com.yunext.kotlin.kmp.ble.util.ui.slave.navigatorSlaveScreen
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import kotlin.uuid.ExperimentalUuidApi
+
+interface XVM
+
+@Composable
+expect  fun < VM : XVM> viewModel():VM
 
 @OptIn(ExperimentalUuidApi::class, ExperimentalLayoutApi::class, ExperimentalStdlibApi::class)
 @Composable
@@ -52,9 +60,10 @@ fun BluetoothScreen(modifier: Modifier) {
     val rootNavController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()
     val currentBackStackEntryAsState by rootNavController.currentBackStackEntryAsState()
-    val vm: MainVM = viewModel(){
-        MainVM()
-    }
+//    val vm: MainVM = viewModel(){
+//        MainVM()
+//    }
+    val vm: IMainVM by remember { mutableStateOf(generateMainVM()) }
     val state by vm.state.collectAsStateWithLifecycle()
     val remainingInsets = remember { MutableWindowInsets() }
     val safeContent = WindowInsets.safeContent
@@ -113,9 +122,12 @@ fun BluetoothScreen(modifier: Modifier) {
                 })
             }
 
-            composable(Screen.ProjectAdd.name + "/{${KEY_ProjectAdd}}",arguments = listOf( navArgument(KEY_ProjectAdd) {
-                type = NavType.StringType
-            })) { backStackEntry ->
+            composable(
+                Screen.ProjectAdd.name + "/{${KEY_ProjectAdd}}",
+                arguments = listOf(navArgument(KEY_ProjectAdd) {
+                    type = NavType.StringType
+                })
+            ) { backStackEntry ->
                 val source: DefaultProject? =
                     backStackEntry.arguments?.getString(KEY_ProjectAdd)?.run {
                         projectOf(this)

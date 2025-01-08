@@ -2,15 +2,15 @@ package com.yunext.kotlin.kmp.ble.util.util
 
 import kotlin.coroutines.RestrictsSuspension
 
-fun Long.toDateStr1(): String {
-    TODO()
-}
+//fun Long.toDateStr1(): String {
+//    {}
+//}
 
-object Utils {
-    fun toDateStr2(timestamp: Long): String {
-        TODO()
-    }
-}
+//object Utils {
+//    fun toDateStr2(timestamp: Long): String {
+//        {}
+//    }
+//}
 
 @RestrictsSuspension
 class MyScope2 internal constructor() {

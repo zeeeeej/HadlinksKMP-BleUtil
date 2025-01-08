@@ -30,23 +30,34 @@ internal fun Project.asDefaultProject() = DefaultProject(
 class ProjectRepositoryImpl : ProjectRepository {
 
     companion object {
-        @OptIn(ExperimentalStdlibApi::class)
+
         internal val p1 = DefaultProject(
+            "angel-light",
+            "安吉尔轻智能",
+//            listOf(DeviceNamePlatformMasterScanFilter("_angel")),
+            "123456",
+            createTime = currentTime(),
+            editTime = currentTime(),
+            defaultDeviceName = "light_792811"
+        )
+
+        @OptIn(ExperimentalStdlibApi::class)
+        internal val p0 = DefaultProject(
             "angel01",
             "安吉尔测试1",
 //            listOf(DeviceNamePlatformMasterScanFilter("_angel")),
             "123456",
             createTime = currentTime(),
             editTime = currentTime(),
-            defaultDeviceName = "angel_${
-                Random.Default.nextBytes(4).toHexString()}"
+            defaultDeviceName = "light_${Random.Default.nextBytes(4).toHexString()}"
         )
         internal val p2 = DefaultProject(
             "qinyuan01",
             "qinyuan测试1",
 //            listOf(DeviceNamePlatformMasterScanFilter("B#QY#")),
-            "123456", createTime = currentTime(), editTime = currentTime(), "B#QY#URQ6690#686B60"
+            "123456", createTime = currentTime(), editTime = currentTime(), "B#QY#URS61278#00F651"
         )
+
         @OptIn(ExperimentalStdlibApi::class)
         internal val p3 = DefaultProject(
             "water",
@@ -56,7 +67,8 @@ class ProjectRepositoryImpl : ProjectRepository {
             createTime = currentTime(),
             editTime = currentTime(),
             defaultDeviceName = "water_${
-                Random.Default.nextBytes(4).toHexString()}"
+                Random.Default.nextBytes(4).toHexString()
+            }"
         )
     }
 
@@ -64,6 +76,7 @@ class ProjectRepositoryImpl : ProjectRepository {
 
 
     init {
+        map[p0.id] = p0
         map[p1.id] = p1
         map[p2.id] = p2
         map[p3.id] = p3

@@ -29,16 +29,17 @@ class DefaultProfile(private val name: String) : IProfile {
         val write =
 
             bluetoothGattCharacteristic(
-                Uuid.parse("616e6765-6c62-6c65-6e6f-746964796368"),
-                arrayOf(
+                Uuid.parse("616e6765-6c62-6c65-7365-6e6463686172"),
+
+                permissions = arrayOf(
                     PlatformBluetoothGattCharacteristic.Permission.Read,
                     PlatformBluetoothGattCharacteristic.Permission.Write
                 ),
-                arrayOf(
+                properties = arrayOf(
                     PlatformBluetoothGattCharacteristic.Property.Read,
                     PlatformBluetoothGattCharacteristic.Property.WriteNoResponse,
                 ),
-                arrayOf(
+                descriptors = arrayOf(
                     bluetoothGattDescriptor(
                         uuid = Uuid.parse(NotifyDescriptorUUID),
                         permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
@@ -50,7 +51,7 @@ class DefaultProfile(private val name: String) : IProfile {
 
         val notify =
             bluetoothGattCharacteristic(
-                Uuid.parse("616e6765-6c62-6c65-7365-6e6463686172"),
+                Uuid.parse("616e6765-6c62-6c65-6e6f-746964796368"),
                 arrayOf(
                     PlatformBluetoothGattCharacteristic.Permission.Read,
                     PlatformBluetoothGattCharacteristic.Permission.Write
@@ -62,7 +63,7 @@ class DefaultProfile(private val name: String) : IProfile {
                 arrayOf(
                     bluetoothGattDescriptor(
                         uuid = Uuid.parse(NotifyDescriptorUUID),
-                        permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead),
+                        permissions = arrayOf(PlatformBluetoothGattDescriptor.Permission.PermissionRead,PlatformBluetoothGattDescriptor.Permission.PermissionWrite),
                         byteArrayOf()
                     )
                 ),
@@ -85,6 +86,7 @@ class DefaultProfile(private val name: String) : IProfile {
 //        }"
             @ExperimentalUuidApi
             override val broadcastService: PlatformBluetoothGattService = angelService()
+
             @ExperimentalUuidApi
             override val services: Array<PlatformBluetoothGattService> =
                 arrayOf(angelService())

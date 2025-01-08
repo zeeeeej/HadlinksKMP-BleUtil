@@ -1,16 +1,29 @@
 package com.yunext.kotlin.kmp.ble.util.ui.slave
 
+import androidx.compose.ui.text.intl.LocaleList.Companion.Empty
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.MutableCreationExtras
+import com.juul.kable.characteristicOf
 import com.yunext.kotlin.kmp.ble.core.PlatformBluetoothContext
 import com.yunext.kotlin.kmp.ble.core.PlatformBluetoothGattCharacteristic
 import com.yunext.kotlin.kmp.ble.core.PlatformPermission
 import com.yunext.kotlin.kmp.ble.core.PlatformPermissionStatus
+import com.yunext.kotlin.kmp.ble.core.bluetoothGattCharacteristic
 import com.yunext.kotlin.kmp.ble.core.platformBluetoothContext
 import com.yunext.kotlin.kmp.ble.history.BluetoothHistory
+import com.yunext.kotlin.kmp.ble.slave.PlatformBleSlaveOnCharacteristicReadRequest
+import com.yunext.kotlin.kmp.ble.slave.PlatformBleSlaveOnCharacteristicWriteRequest
+import com.yunext.kotlin.kmp.ble.slave.PlatformBleSlaveOnDescriptorReadRequest
+import com.yunext.kotlin.kmp.ble.slave.PlatformBleSlaveOnDescriptorWriteRequest
+import com.yunext.kotlin.kmp.ble.slave.PlatformBleSlaveOnExecuteWrite
+import com.yunext.kotlin.kmp.ble.slave.PlatformBleSlaveOnMtuChanged
+import com.yunext.kotlin.kmp.ble.slave.PlatformBleSlaveOnNotificationSent
+import com.yunext.kotlin.kmp.ble.slave.PlatformBleSlaveOnPhyRead
+import com.yunext.kotlin.kmp.ble.slave.PlatformBleSlaveOnPhyUpdate
+import com.yunext.kotlin.kmp.ble.slave.PlatformResponse
 import com.yunext.kotlin.kmp.ble.slave.PlatformSlave
 import com.yunext.kotlin.kmp.ble.slave.SlaveState
 import com.yunext.kotlin.kmp.ble.slave.SlaveWriteParam
@@ -29,6 +42,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonObject
 import kotlin.random.Random
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -89,7 +103,8 @@ fun creationExtrasOfProject(project: Project): CreationExtras {
 
 //}
 
-class SlaveVM(handler: SavedStateHandle, project: Project) : ViewModel() {
+@OptIn(ExperimentalUuidApi::class, ExperimentalStdlibApi::class)
+class SlaveVM(handler: SavedStateHandle, private val project: Project) : ViewModel() {
     private val platformBluetoothContext: PlatformBluetoothContext = platformBluetoothContext()
 
 
@@ -99,6 +114,11 @@ class SlaveVM(handler: SavedStateHandle, project: Project) : ViewModel() {
         }
 
         ProjectRepositoryImpl.p1.id -> {
+
+            DefaultProfile(project.defaultDeviceName).create()
+        }
+
+        ProjectRepositoryImpl.p0.id -> {
 
             DefaultProfile(project.defaultDeviceName).create()
         }
@@ -163,6 +183,21 @@ class SlaveVM(handler: SavedStateHandle, project: Project) : ViewModel() {
             launch {
                 slave.eventChannel.receiveAsFlow().collect {
                     println("[BLE]vm event = $it")
+                    when (it) {
+                        is PlatformBleSlaveOnCharacteristicReadRequest -> {}
+                        is PlatformBleSlaveOnCharacteristicWriteRequest -> {
+                            resp(it)
+                        }
+
+                        is PlatformBleSlaveOnDescriptorReadRequest -> {}
+                        is PlatformBleSlaveOnDescriptorWriteRequest -> {}
+                        is PlatformBleSlaveOnExecuteWrite -> {}
+                        is PlatformBleSlaveOnMtuChanged -> {}
+                        is PlatformBleSlaveOnNotificationSent -> {}
+                        is PlatformBleSlaveOnPhyRead -> {}
+                        is PlatformBleSlaveOnPhyUpdate -> {}
+                    }
+
                 }
             }
             launch {
@@ -173,17 +208,219 @@ class SlaveVM(handler: SavedStateHandle, project: Project) : ViewModel() {
         }
     }
 
+    private suspend fun resp(request: PlatformBleSlaveOnCharacteristicWriteRequest) {
+        when (project.id) {
+            ProjectRepositoryImpl.p3.id -> {
+            }
+
+            ProjectRepositoryImpl.p1.id -> {
+                respAngelLight(request)
+            }
+
+            ProjectRepositoryImpl.p0.id -> {
+                respAngelLight(request)
+
+            }
+
+            ProjectRepositoryImpl.p2.id -> {
+            }
+        }
+    }
+
+    private suspend fun respAngelLight(request: PlatformBleSlaveOnCharacteristicWriteRequest) {
+        val value = request.value ?: return
+        // angel_light 模拟回复
+
+        val hexValue = value.toHexString()
+        println("[BLE]hexValue:$hexValue")
+        when {
+            // 鉴权 5aa5b100104b6ab6c528f6e7b4f218f35377af3d
+            hexValue.startsWith("5aa5b1") -> {
+                println("[BLE]ok1")
+                val state = state.value.slaveState
+                if (state is SlaveState.Connected) {
+                    val notify = state.services.firstOrNull() {
+                        it.uuid.toString() == "616e6765-6c62-6c70-6573-657276696365"
+                    }?.characteristics?.firstOrNull() {
+                        (it.uuid.toString() == "616e6765-6c62-6c65-6e6f-746964796368") and (
+                                it.properties.contains(
+                                    PlatformBluetoothGattCharacteristic.Property.Notify
+                                ) or
+                                        it.properties.contains(
+                                            PlatformBluetoothGattCharacteristic.Property.Indicate
+                                        ))
+                    } ?: return
+                    println("[BLE]ok2")
+                    // 5a a5 b2 00 01 00 b2
+                    val param = SlaveWriteParam(
+                        characteristic = notify,
+                        byteArrayOf(
+                            0x5a,
+                            0xa5.toByte(),
+                            0xb2.toByte(),
+                            0x00,
+                            0x01,
+                            0x00,
+                            0xb2.toByte()
+                        ),
+                        request.responseNeeded
+                    )
+                    slave.notify(param)
+                }
+
+
+            }
+            // 开关机:5aa5a30003020201aa
+            // 开关机:5aa5a40003020200aa
+            hexValue.startsWith("5aa5a300030202") -> {
+                val state = state.value.slaveState
+                if (state is SlaveState.Connected) {
+                    val notify = state.services.firstOrNull() {
+                        it.uuid.toString() == "616e6765-6c62-6c70-6573-657276696365"
+                    }?.characteristics?.firstOrNull() {
+                        (it.uuid.toString() == "616e6765-6c62-6c65-6e6f-746964796368") and (
+                                it.properties.contains(
+                                    PlatformBluetoothGattCharacteristic.Property.Notify
+                                ) or
+                                        it.properties.contains(
+                                            PlatformBluetoothGattCharacteristic.Property.Indicate
+                                        ))
+                    } ?: return
+                    val param = SlaveWriteParam(
+                        characteristic = notify,
+                        "5aa5a40003020200aa".hexToByteArray(),
+                        request.responseNeeded
+                    )
+                    slave.notify(param)
+                    delay(1000)
+
+                    slave.notify(
+                        SlaveWriteParam(
+                            characteristic = notify,
+                            if (value[value.size - 2] == 0x01.toByte()) {
+                                "5aa5a2000403060000ae"
+                            } else {
+                                "5aa5a2000403060001af"
+                            }.hexToByteArray(),
+                            request.responseNeeded
+                        )
+                    )
+                }
+
+
+            }
+            // 冲洗:5aa5a30003020301aa
+            // 冲洗:5aa5a40003020300aa
+            hexValue.startsWith("5aa5a300030203") -> {
+                val state = state.value.slaveState
+                if (state is SlaveState.Connected) {
+                    val notify = state.services.firstOrNull() {
+                        it.uuid.toString() == "616e6765-6c62-6c70-6573-657276696365"
+                    }?.characteristics?.firstOrNull() {
+                        (it.uuid.toString() == "616e6765-6c62-6c65-6e6f-746964796368") and (
+                                it.properties.contains(
+                                    PlatformBluetoothGattCharacteristic.Property.Notify
+                                ) or
+                                        it.properties.contains(
+                                            PlatformBluetoothGattCharacteristic.Property.Indicate
+                                        ))
+                    } ?: return
+                    // 5a a5 b2 00 01 00 b2
+                    val param = SlaveWriteParam(
+                        characteristic = notify,
+                        "5aa5a40003020300ab".hexToByteArray(),
+                        request.responseNeeded
+                    )
+                    slave.notify(param)
+                    delay(1000)
+                    slave.notify(
+                        SlaveWriteParam(
+                            characteristic = notify,
+                            if (value[value.size-2]==0x01.toByte()){
+                                "5aa5a2000403060004b2"
+                            }else{
+                                "5aa5a2000403060000ae"
+                            }.hexToByteArray(),
+                            request.responseNeeded
+                        )
+                    )
+                }
+
+
+            }
+
+            // 产测:5aa5fe0000fd
+            // 产测:5aa5fe00120203000506010203040506060102030405064f
+            hexValue.startsWith("5aa5fe") -> {
+                val state = state.value.slaveState
+                if (state is SlaveState.Connected) {
+                    val notify = state.services.firstOrNull() {
+                        it.uuid.toString() == "616e6765-6c62-6c70-6573-657276696365"
+                    }?.characteristics?.firstOrNull() {
+                        (it.uuid.toString() == "616e6765-6c62-6c65-6e6f-746964796368") and (
+                                it.properties.contains(
+                                    PlatformBluetoothGattCharacteristic.Property.Notify
+                                ) or
+                                        it.properties.contains(
+                                            PlatformBluetoothGattCharacteristic.Property.Indicate
+                                        ))
+                    } ?: return
+                    // 5a a5 b2 00 01 00 b2
+                    // 01020304 06313233343536 06373932383131
+                    //            123456           792811
+                    val param = SlaveWriteParam(
+                        characteristic = notify,
+                        "5aa5fe001201020304063132333435360637393238313196".hexToByteArray(),
+                        request.responseNeeded
+                    )
+                    slave.notify(param)
+                }
+
+
+            }
+            // 恢复出厂设置 5aa5a30003022100c8
+            // 恢复出厂设置 5aa5a40003022100c9
+            hexValue.startsWith("5aa5a300030221") -> {
+                val state = state.value.slaveState
+                if (state is SlaveState.Connected) {
+                    val notify = state.services.firstOrNull() {
+                        it.uuid.toString() == "616e6765-6c62-6c70-6573-657276696365"
+                    }?.characteristics?.firstOrNull() {
+                        (it.uuid.toString() == "616e6765-6c62-6c65-6e6f-746964796368") and (
+                                it.properties.contains(
+                                    PlatformBluetoothGattCharacteristic.Property.Notify
+                                ) or
+                                        it.properties.contains(
+                                            PlatformBluetoothGattCharacteristic.Property.Indicate
+                                        ))
+                    } ?: return
+                    val param = SlaveWriteParam(
+                        characteristic = notify,
+                        "5aa5a40003022100c9".hexToByteArray(),
+                        request.responseNeeded
+                    )
+                    slave.notify(param)
+                }
+
+
+            }
+        }
+
+
+    }
+
     private var startWriteJob: Job? = null
 
     @OptIn(ExperimentalUuidApi::class)
     private fun startWriteJob(connected: SlaveState.Connected) {
         val first = connected.services.firstOrNull() {
-            it.uuid.toString() == His.BaseService.FilterService.uuid
+            it.uuid.toString() == TEST_Service
         }?.characteristics?.firstOrNull() {
-            it.properties.contains(PlatformBluetoothGattCharacteristic.Property.Notify) or
-                    it.properties.contains(PlatformBluetoothGattCharacteristic.Property.Indicate)
+            (it.uuid.toString() == TEST_CH) and (
+                    it.properties.contains(PlatformBluetoothGattCharacteristic.Property.Notify) or
+                            it.properties.contains(PlatformBluetoothGattCharacteristic.Property.Indicate))
         } ?: return
-        println("startWriteJob $first")
+        println("startWriteJob $first $TEST_Service $TEST_CH")
         startWriteJob?.cancel()
         startWriteJob = viewModelScope.launch {
             while (isActive) {
@@ -219,3 +456,20 @@ class SlaveVM(handler: SavedStateHandle, project: Project) : ViewModel() {
         slave.close()
     }
 }
+
+
+val TEST_Service = His.BaseService.FilterService.uuid
+
+val TEST_CH =
+    His.uuidOf("a201", His.BaseService.FilterService)
+
+
+class A {
+
+    companion object
+}
+
+val A.Companion.Empty: A
+    get() = A()
+
+

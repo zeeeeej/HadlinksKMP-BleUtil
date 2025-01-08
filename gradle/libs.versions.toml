@@ -8,6 +8,7 @@ android-compileSdk = "35"
 maven-publish = "0.28.0"
 
 android-targetSdk = "30"
+
 android-lifecycle = "2.8.7"
 androidx-activityCompose = "1.9.0"
 androidx-appcompat = "1.7.0"
