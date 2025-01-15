@@ -96,6 +96,12 @@ kotlin {
             api(libs.ktor.client.okhttp)
             api(libs.ktor.client.cio)
         }
+
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
     }
 }
 

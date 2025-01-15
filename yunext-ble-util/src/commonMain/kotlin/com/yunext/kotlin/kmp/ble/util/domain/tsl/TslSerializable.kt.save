@@ -1,0 +1,323 @@
+package com.yunext.kotlin.kmp.ble.util.domain.tsl
+
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.builtins.ArraySerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.element
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.encoding.CompositeDecoder
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.modules.SerializersModule
+
+interface TslSerializable<T> {
+    fun decode(source: T): Tsl
+    fun encode(source: Tsl): T
+}
+
+//<editor-fold desc="Json impl">
+private val jsonTslSerializable = JsonTslSerializable()
+
+fun Tsl.encodeJson(): String = this.encodeJson(jsonTslSerializable)
+fun String.decodeJson(): Tsl = this.decodeJson(jsonTslSerializable)
+
+fun <T> Tsl.encodeJson(serializable: TslSerializable<T>): T {
+    return serializable.encode(this)
+}
+
+fun <T> T.decodeJson(serializable: TslSerializable<T>): Tsl {
+    return serializable.decode(this)
+}
+
+object TslPropertyTypeSerializer : KSerializer<TslPropertyType> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("TslPropertyType", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: TslPropertyType) {
+        println("TslPropertyTypeSerializer--serialize-->${value.key}")
+        encoder.encodeString(value.key)
+    }
+
+    override fun deserialize(decoder: Decoder): TslPropertyType {
+        val key = decoder.decodeString()
+        return TslPropertyType.of(key)
+    }
+}
+
+internal object TslPropertySerializer : KSerializer<TslProperty> {
+    override val descriptor: SerialDescriptor =
+        //JsonElement.serializer().descriptor
+        PrimitiveSerialDescriptor("TslProperty", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: TslProperty) {
+        when (value) {
+            is TslProperty.IntProperty -> encoder.encodeSerializableValue(
+                TslProperty.IntProperty.serializer(),
+                value
+            )
+
+            is TslProperty.ArrayProperty -> encoder.encodeSerializableValue(
+                TslProperty.ArrayProperty.serializer(),
+                value
+            )
+
+            is TslProperty.BoolProperty -> encoder.encodeSerializableValue(
+                TslProperty.BoolProperty.serializer(),
+                value
+            )
+
+            is TslProperty.DateProperty -> encoder.encodeSerializableValue(
+                TslProperty.DateProperty.serializer(),
+                value
+            )
+
+            is TslProperty.DoubleProperty -> encoder.encodeSerializableValue(
+                TslProperty.DoubleProperty.serializer(),
+                value
+            )
+
+            is TslProperty.EnumBooleanProperty -> encoder.encodeSerializableValue(
+                TslProperty.EnumBooleanProperty.serializer(),
+                value
+            )
+
+            is TslProperty.EnumTextProperty -> encoder.encodeSerializableValue(
+                TslProperty.EnumTextProperty.serializer(),
+                value
+            )
+
+            is TslProperty.FloatProperty -> encoder.encodeSerializableValue(
+                TslProperty.FloatProperty.serializer(),
+                value
+            )
+
+            is TslProperty.StructProperty -> encoder.encodeSerializableValue(
+                TslProperty.StructProperty.serializer(),
+                value
+            )
+
+            is TslProperty.TextProperty -> encoder.encodeSerializableValue(
+                TslProperty.TextProperty.serializer(),
+                value
+            )
+        }
+    }
+
+    override fun deserialize(decoder: Decoder): TslProperty {
+        require(decoder is JsonDecoder) // 确保我们正在处理JSON数据
+        val jsonElement = decoder.decodeJsonElement()
+        val dataType = jsonElement.jsonObject["dataType"]?.jsonPrimitive?.content ?: ""
+        println("======> dataType : $dataType")
+        val propertyType = TslPropertyType.of(dataType)
+        return when (propertyType) {
+            TslPropertyType.INT -> decoder.decodeSerializableValue(TslProperty.IntProperty.serializer())
+            TslPropertyType.FLOAT -> decoder.decodeSerializableValue(TslProperty.FloatProperty.serializer())
+            TslPropertyType.DOUBLE -> decoder.decodeSerializableValue(TslProperty.DoubleProperty.serializer())
+            TslPropertyType.TEXT -> decoder.decodeSerializableValue(TslProperty.TextProperty.serializer())
+            TslPropertyType.DATE -> decoder.decodeSerializableValue(TslProperty.DateProperty.serializer())
+            TslPropertyType.BOOL -> decoder.decodeSerializableValue(TslProperty.BoolProperty.serializer())
+            TslPropertyType.ENUM -> decoder.decodeSerializableValue(TslProperty.EnumTextProperty.serializer())
+            TslPropertyType.STRUCT -> decoder.decodeSerializableValue(TslProperty.StructProperty.serializer())
+            TslPropertyType.ARRAY -> decoder.decodeSerializableValue(TslProperty.ArrayProperty.serializer())
+        }
+    }
+}
+
+internal object TslPropertySerializerV2 : KSerializer<TslProperty> {
+    override val descriptor: SerialDescriptor =
+        buildClassSerialDescriptor("TslProperty") {
+
+            element<String>("identifier")
+            element<String>("name")
+            element<Boolean>("required")
+            element<String>("desc")
+            element<TslAccessMode>("accessMode")
+            element<TslPropertyType>("dataType")
+            element<TslSpecDef>("spec")
+//            element<String>("dataType")
+        }
+
+    override fun serialize(encoder: Encoder, value: TslProperty) {
+        val output = encoder.beginStructure(descriptor)
+        output.encodeStringElement(descriptor, 0, value.identifier)
+        output.encodeStringElement(descriptor, 1, value.name)
+        output.encodeBooleanElement(descriptor, 2, value.required)
+        output.encodeStringElement(descriptor, 3, value.desc)
+        output.encodeSerializableElement(descriptor, 4, TslAccessModeSerializer, value.accessMode)
+        output.encodeSerializableElement(descriptor, 5, TslPropertyTypeSerializer, value.dataType)
+        when (value) {
+            is TslProperty.ArrayProperty -> {
+                output.encodeSerializableElement(
+                    descriptor,
+                    6,
+                   TslSpecDef,
+                    value.spec
+                )
+            }
+
+            is TslProperty.BoolProperty -> TODO()
+            is TslProperty.DateProperty -> TODO()
+            is TslProperty.DoubleProperty -> TODO()
+            is TslProperty.EnumBooleanProperty -> TODO()
+            is TslProperty.EnumTextProperty -> TODO()
+            is TslProperty.FloatProperty -> TODO()
+            is TslProperty.IntProperty -> output.encodeSerializableElement(
+                descriptor,
+                6,
+                TslSpecDef,
+                value.spec
+            )
+
+            is TslProperty.StructProperty -> TODO()
+            is TslProperty.TextProperty -> TODO()
+        }
+        output.endStructure(descriptor)
+    }
+
+    override fun deserialize(decoder: Decoder): TslProperty {
+        val input = decoder.beginStructure(descriptor)
+//        element<String>("identifier")
+//        element<String>("name")
+//        element<Boolean>("required")
+//        element<String>("desc")
+//        element<String>("accessMode")
+//        element<String>("dataType")
+//        element<String>("spec")
+        var identifier: String? = null
+        var name: String? = null
+        var required: Boolean? = null
+        var desc: String? = null
+        var accessMode: TslAccessMode? = null
+        var dataType: TslPropertyType? = null
+        var spec: TslSpecDef? = null
+
+        loop@ while (true) {
+            when (val index = input.decodeElementIndex(descriptor)) {
+                0 -> identifier = input.decodeStringElement(descriptor, index)
+                1 -> name = input.decodeStringElement(descriptor, index)
+                2 -> required = input.decodeBooleanElement(descriptor, index)
+                3 -> desc = input.decodeStringElement(descriptor, index)
+                4 -> accessMode = input.decodeSerializableElement(descriptor, index,TslAccessModeSerializer)
+                5 -> dataType = input.decodeSerializableElement(descriptor, index, TslPropertyTypeSerializer)
+                6 -> spec = input.decodeSerializableElement(descriptor, index, TslSpecDef.serializer())
+                CompositeDecoder.DECODE_DONE -> break@loop
+                else -> throw SerializationException("Unexpected index: $index")
+            }
+        }
+
+        input.endStructure(descriptor)
+        return when(dataType){
+            TslPropertyType.INT ->   TslProperty.IntProperty(
+                identifier = identifier?:"",
+                name = name?:"",
+                required = required?:false,
+                desc = desc?:"",
+                accessMode = accessMode?:TslAccessMode.R,
+                dataType = TslPropertyType.INT,
+                spec = spec  as TslNumberSpec<Int>
+            )
+            TslPropertyType.FLOAT -> TODO()
+            TslPropertyType.DOUBLE -> TODO()
+            TslPropertyType.TEXT -> TODO()
+            TslPropertyType.DATE -> TODO()
+            TslPropertyType.BOOL -> TODO()
+            TslPropertyType.ENUM -> TODO()
+            TslPropertyType.STRUCT -> TODO()
+            TslPropertyType.ARRAY -> TODO()
+            null -> TODO()
+        }
+    }
+}
+
+private object TslAccessModeSerializer : KSerializer<TslAccessMode> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("TslAccessMode", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: TslAccessMode) {
+        encoder.encodeString(value.key)
+    }
+
+    override fun deserialize(decoder: Decoder): TslAccessMode {
+        val key = decoder.decodeString()
+        return TslAccessMode.of(key)
+    }
+}
+
+private object TslEventTypeSerializer : KSerializer<TslEventType> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("TslEventType", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: TslEventType) {
+        encoder.encodeString(value.key)
+    }
+
+    override fun deserialize(decoder: Decoder): TslEventType {
+        val key = decoder.decodeString()
+        return TslEventType.of(key)
+    }
+}
+
+private object TslServiceCallTypeSerializer : KSerializer<TslServiceCallType> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("TslServiceCallType", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: TslServiceCallType) {
+        encoder.encodeString(value.key)
+    }
+
+    override fun deserialize(decoder: Decoder): TslServiceCallType {
+        val key = decoder.decodeString()
+        return TslServiceCallType.of(key)
+    }
+}
+
+class JsonTslSerializable : TslSerializable<String> {
+    private val json = Json {
+        encodeDefaults = true
+        ignoreUnknownKeys = true
+        prettyPrint = true
+        serializersModule = SerializersModule {
+//            contextual(TslProperty::class, TslPropertySerializer)
+////            contextual(TslPropertyType::class, TslPropertyTypeSerializer)
+//            contextual(TslAccessMode::class, TslAccessModeSerializer)
+//            contextual(TslEventType::class, TslEventTypeSerializer)
+//            contextual(TslServiceCallType::class, TslServiceCallTypeSerializer)
+        }
+
+    }
+
+    override fun decode(source: String): Tsl {
+        return json.decodeFromString<Tsl>(source)
+    }
+
+    override fun encode(source: Tsl): String {
+        return json.encodeToString(source)
+    }
+
+}
+//</editor-fold>
+
+class ByteArrayTslSerializable : TslSerializable<ByteArray> {
+    override fun decode(source: ByteArray): Tsl {
+        TODO("Not yet implemented")
+    }
+
+    override fun encode(source: Tsl): ByteArray {
+        TODO("Not yet implemented")
+    }
+
+}
